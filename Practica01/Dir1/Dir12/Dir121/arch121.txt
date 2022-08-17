@@ -1,0 +1,55 @@
+7626  mkdir Practica01
+ 7627  ls
+ 7628  mkdir Dir1
+ 7629  cd Dir1
+ 7630  ls
+ 7631  mkdir Dir11 & mkdir Dir12
+ 7632  cd Dir11
+ 7633  mkdir Dir111 & mkdir Dir112 & mkdir Dir113
+ 7634  cd Dir111
+ 7635  touch arch111.txt
+ 7636  cd ..
+ 7637  cd Dir112
+ 7638  touch arch112.py
+ 7639  cd ..
+ 7640  cd Dir12
+ 7641  mkdir Dir121
+ 7642  cd Dir121
+ 7643  touch arch121.txt
+ 7644  mkdir Dir1212
+ 7645  cd Dir1212
+ 7646  touch arch1212.txt
+ 7647  cd ..
+ 7648  tree
+ 7649  ls
+ 7650  mv Dir1 ./Practica01
+ 7651  ls
+ 7652  cd Practica01
+ 7653  ls
+ 7654  cp -r Dir1 Dir1_cp
+ 7655  ls
+ 7656  mv Dir1_cp Copia_dir
+ 7657  ls
+ 7658  cd Dir1
+ 7659  ls
+ 7660  cd Dir11/Dir111
+ 7661  ls
+ 7662  vim arch111.txt
+ 7663  cat arch111.txt
+ 7664  cd ..
+ 7665  ls
+ 7666  git status
+ 7667  git add .
+ 7668  git status
+ 7669  git commit -m "Primer commit correcto"
+ 7670  git status
+ 7671  git push
+ 7672  ls
+ 7673  rm -r Copia_dir
+ 7674  git status
+ 7675  git add .
+ 7676  git status
+ 7677  git commit -m "Borrada de directorio copia"
+ 7678  git status
+ 7679  git push
+ 7680  top
