@@ -9,14 +9,12 @@
 #define luminosidad A1
 #define sharp A2
 
-//#define DHTPIN 21  
-#define DHTPIN 3
+#define DHTPIN 10
 #define DHTTYPE DHT11
 
 DHT dht(DHTPIN, DHTTYPE);
 
-int maxV = 863;
-int minV = 656;
+int minV = 687;
 
 int salidaVoltimetro;
 int salidaLuminosidad;
@@ -34,7 +32,7 @@ void setup() {
   Serial.begin(9600);
 
   dht.begin();
-  
+ 
   lcd.init();
   lcd.backlight();
 
@@ -44,14 +42,12 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(LED, LOW);
-  
+ 
   salidaVoltimetro = analogRead(voltimetro);
   salidaLuminosidad = analogRead(luminosidad);
 
-  delay(2000);
+  delay(1000);
   tempC = dht.readTemperature();
-  delay(2000);
 
   // Checa distancia con sensor ultrasonico
   digitalWrite(trig, LOW);
@@ -66,15 +62,15 @@ void loop() {
   int sensor = analogRead(sharp);
   distanciaSharp = 1990*(pow(sensor, -0.921));
 
-  Serial.println(tempC);
+  // Serial.println(tempC);
   printResults();
   checarLimites();
   printLCD();  
 }
 
 void printLCD() {
-  lcd.backlight();
-  
+  lcd.clear();
+ 
   lcd.setCursor(0,0);
   lcd.print("L: ");
   lcd.print(salidaLuminosidad);
@@ -86,17 +82,17 @@ void printLCD() {
 
 void checarLimites() {
   byte count = 0b0000;
-  
+ 
   // Voltimetro
   if (salidaVoltimetro < minV) {
     bitWrite(count, 0, 1);
   }
-  
+ 
   // Temperatura
-  if (tempC > 25.0) {
+  if (tempC > 20.0) {
     bitWrite(count, 1, 1);
   }
-  
+ 
   // Sensor ultrasónico
   if (distanciaUltrasonico <= 15) {
     bitWrite(count, 2, 1);
@@ -107,12 +103,14 @@ void checarLimites() {
     bitWrite(count, 3, 1);
   }
 
+  resultadoLCD = "";
   if (count == 0b0000) {
     digitalWrite(LED, LOW);
     resultadoLCD = "";
   } else if ((count == 0b1000) or (count == 0b0100) or (count == 0b0010) or (count == 0b0001)) {
     digitalWrite(LED, HIGH);
-    resultadoLCD = errors[int(log(x)/log(2)];
+    int index = int(log(count)/log(2));
+    resultadoLCD = errors[index];
   } else {
     digitalWrite(LED, HIGH);
     for (int i = 0; i <= 3; i++) {
@@ -139,7 +137,7 @@ void printResults() {
   Serial.print("T: ");
   Serial.print(tempC);
   Serial.print(" C");
-  
+ 
   Serial.print(" -- ");
 
   Serial.print("DU: ");
