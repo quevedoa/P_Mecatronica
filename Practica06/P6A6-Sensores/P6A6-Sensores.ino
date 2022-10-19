@@ -2,17 +2,18 @@
 #include <LiquidCrystal_I2C.h>
 #include "DHT.h"
 
-#define DHTPIN 21  
-#define DHTTYPE DHT11
-
-DHT dht(DHTPIN, DHTTYPE);
-
 #define LED 8
 #define echo 6
 #define trig 7
 #define voltimetro A0
 #define luminosidad A1
 #define sharp A2
+
+//#define DHTPIN 21  
+#define DHTPIN 3
+#define DHTTYPE DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
 
 int maxV = 863;
 int minV = 656;
@@ -24,6 +25,8 @@ float distanciaUltrasonico;
 float distanciaSharp;
 
 String resultadoLCD;
+String errors[4] = {"Low Battery", "Overheating", "U_Obstacle", "S_Obstacle"};
+String errorsShort[4] = {"Bt", "Tmp", "UObs", "SObs"};
 
 LiquidCrystal_I2C lcd(0x27,16,2);
 
@@ -46,8 +49,9 @@ void loop() {
   salidaVoltimetro = analogRead(voltimetro);
   salidaLuminosidad = analogRead(luminosidad);
 
-//  delay(2000);
+  delay(2000);
   tempC = dht.readTemperature();
+  delay(2000);
 
   // Checa distancia con sensor ultrasonico
   digitalWrite(trig, LOW);
@@ -63,9 +67,9 @@ void loop() {
   distanciaSharp = 1990*(pow(sensor, -0.921));
 
   Serial.println(tempC);
-//  printResults();
-//  printLCD();
-//  checarLimites();
+  printResults();
+  checarLimites();
+  printLCD();  
 }
 
 void printLCD() {
@@ -81,28 +85,41 @@ void printLCD() {
 }
 
 void checarLimites() {
+  byte count = 0b0000;
+  
   // Voltimetro
-  if (salidaVoltimetro > minV) {
-    digitalWrite(LED, HIGH);
-    resultadoLCD = "Low Battery";
+  if (salidaVoltimetro < minV) {
+    bitWrite(count, 0, 1);
   }
-
+  
   // Temperatura
-  if (tempC > 27.0) {
-    digitalWrite(LED, HIGH);
-    resultadoLCD = "Overheating";
+  if (tempC > 25.0) {
+    bitWrite(count, 1, 1);
   }
-
+  
   // Sensor ultrasónico
   if (distanciaUltrasonico <= 15) {
-    digitalWrite(LED, HIGH);
-    resultadoLCD = "U_Obstacle";
+    bitWrite(count, 2, 1);
   }
 
   // Sensor sharp
   if (distanciaSharp <= 15) {
+    bitWrite(count, 3, 1);
+  }
+
+  if (count == 0b0000) {
+    digitalWrite(LED, LOW);
+    resultadoLCD = "";
+  } else if ((count == 0b1000) or (count == 0b0100) or (count == 0b0010) or (count == 0b0001)) {
     digitalWrite(LED, HIGH);
-    resultadoLCD = "S_Obstacle";
+    resultadoLCD = errors[int(log(x)/log(2)];
+  } else {
+    digitalWrite(LED, HIGH);
+    for (int i = 0; i <= 3; i++) {
+      if (bitRead(count, i) == 1) {
+        resultadoLCD = resultadoLCD + errorsShort[i] + "-";
+      }
+    }
   }
 }
 
