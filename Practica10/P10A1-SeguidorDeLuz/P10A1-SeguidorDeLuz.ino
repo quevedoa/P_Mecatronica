@@ -81,10 +81,7 @@ void lightSensor() {
   Serial.print(L_LDR);
   Serial.print(" - B: ");
   Serial.println(B_LDR);
-//  printLightSensors();
-
-  // Falta definir el umbral_sup y umbral_inf
-  // Falta definir que valor del B_LDR significa que el robot esta volteado
+  printLightSensors();
 }
 
 void  printLightSensors() {
