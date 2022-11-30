@@ -17,8 +17,10 @@
 #define fotoRes3 A3
 
 int L_LDR, R_LDR, B_LDR, light_dif;
-int umbral_sup = -25, umbral_inf = -35;
-int umbralB_sup = 400, umbralB_inf = 350;
+int umbral_sup = 80, umbral_inf = -80;
+int umbralB = 450;
+
+long tiempo = millis();
 
 LiquidCrystal_I2C lcd(0x27,16,2);
 
@@ -45,25 +47,23 @@ void loop() {
 }
 
 void followLight() {
-  if ((B_LDR >= umbralB_inf) && (B_LDR <= umbralB_sup)) {
-    while ((light_dif < umbral_inf) && (light_dif > umbral_sup)) {
-      lightSensor();
-      DriveRobot(1,-1);
-    }
+  while (B_LDR >= umbralB) {
+    lightSensor();
+    DriveRobot(1,-1);
   }
-  
-  if ((light_dif > umbral_inf) && (light_dif < umbral_sup)) {
+
+  if ((light_dif > umbral_inf) && (light_dif < umbral_sup) && (R_LDR > 380)) {
     lightSensor();
     DriveRobot(1,1);
   } else if (light_dif >= umbral_sup) {
     while (light_dif >= umbral_sup) {
       lightSensor();
-      DriveRobot(1,-1);
+      DriveRobot(-1,1);
     }
   } else if (light_dif <= umbral_inf) {
     while (light_dif <= umbral_inf) {
       lightSensor();
-      DriveRobot(-1,1);
+      DriveRobot(1,-1);
     }
   }
 }
@@ -80,12 +80,17 @@ void lightSensor() {
   Serial.print(" - L: ");
   Serial.print(L_LDR);
   Serial.print(" - B: ");
-  Serial.println(B_LDR);
-  printLightSensors();
+  Serial.print(B_LDR);
+  Serial.print(" - DIFF: ");
+  Serial.println(light_dif);
+  
+
+  if (tiempo % 1000 == 0) {
+    printLightSensors();
+  }
 }
 
 void  printLightSensors() {
-  lcd.clear();
 
   lcd.setCursor(0,0);
   lcd.print("L:");
@@ -98,18 +103,20 @@ void  printLightSensors() {
   lcd.print(light_dif);
   lcd.print(" - B:");
   lcd.print(B_LDR);
+
+  
 }
 
 void DriveRobot(float LSignal, float RSignal) {
   // Si la señal de la rueda izquierda es menor a 0, entonces esta gira hacia atràs.
-  if(LSignal < 0) {
+  if(LSignal > 0) {
     digitalWrite(signal1MotorA,HIGH);
     digitalWrite(signal2MotorA,LOW);
     digitalWrite(acelerar1, 10);
   }
   
   // Si la señal de la rueda izquierda es mayor a cero, entonces girarà hacia adelante.
-  if(LSignal > 0) {
+  if(LSignal < 0) {
     digitalWrite(signal1MotorA,LOW);
     digitalWrite(signal2MotorA,HIGH);
     digitalWrite(acelerar1, 10);
@@ -123,14 +130,14 @@ void DriveRobot(float LSignal, float RSignal) {
   }
   
   // Si la señal de la rueda derecha es menor a cero, entonces girarà hacia atràs.
-  if(RSignal < 0) {
+  if(RSignal > 0) {
     digitalWrite(signal1MotorB,LOW);
     digitalWrite(signal2MotorB, HIGH);
     digitalWrite(acelerar2, 10);
   }
   
   // Si la señal de la rueda derecha es mayor a cero, entonces girarà hacia adelante.
-  if( RSignal > 0) {
+  if( RSignal < 0) {
     digitalWrite(signal1MotorB,HIGH);
     digitalWrite(signal2MotorB,LOW);
     digitalWrite(acelerar2, 10);
@@ -143,41 +150,6 @@ void DriveRobot(float LSignal, float RSignal) {
     digitalWrite(acelerar2, 0);
   }
 }
-
-//void DriveRobot(float LSignal, float RSignal) {
-//  if (LSignal > 0 && RSignal > 0) {
-//    Serial.println("adelante");
-//    digitalWrite(signal1MotorA, HIGH);
-//    digitalWrite(signal2MotorA, LOW);
-//
-//    digitalWrite(signal1MotorB, HIGH);
-//    digitalWrite(signal2MotorB, LOW);
-//  } else if (LSignal > 0 && RSignal < 0) {
-//    Serial.println("derecha");
-//    digitalWrite(signal1MotorA, HIGH);
-//    digitalWrite(signal2MotorA, LOW);
-//    
-//    digitalWrite(signal1MotorB, LOW);
-//    digitalWrite(signal2MotorB, HIGH);
-//  } else if (LSignal < 0 && RSignal > 0) {
-//    Serial.println("izquierda");
-//    digitalWrite(signal1MotorA, LOW);
-//    digitalWrite(signal2MotorA, HIGH);
-//
-//    digitalWrite(signal1MotorB, HIGH);
-//    digitalWrite(signal2MotorB, LOW);
-//  } else if(LSignal < 0 && RSignal < 0){
-//    Serial.println("atras");
-//    digitalWrite(signal1MotorA, LOW);
-//    digitalWrite(signal2MotorA, HIGH);
-//
-//    digitalWrite(signal1MotorB, LOW);
-//    digitalWrite(signal2MotorB, HIGH);
-//    
-//  }else {
-//    stopRobot();
-//  }
-//}
 
 void stopRobot() {
     digitalWrite(signal1MotorA, LOW);
